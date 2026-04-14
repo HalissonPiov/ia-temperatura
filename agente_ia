@@ -1,0 +1,82 @@
+# Esse é um agente inteligência responsável por medir, monitorar e regular a temperatura de um ambiente de um local. Seu objetivo é manter a temperatura no valor pré-estabelecido e assim, ele é capaz de ativar o sistema de aquecimento ou resfriamento conforme a temperatura varia de acordo com o tempo.
+
+# - temperatura atual
+# - temperatura desejada: 25°C - tolerância entre 24°C e 26°C
+# - estado do sistema (ligado/desligado);
+
+# FUNÇÃO DO AGENTE:
+
+# - REGRAS: 
+# 	Se temperatura atual > temperatura desejada + margem → ação: ligar (resfriamento)
+# 	Se temperatura atual < temperatura desejada - margem → ação: desligar
+# 	Se temperatura está dentro da faixa aceitável → ação: manter
+
+# - MEMÓRIA: 
+# 	A temperatura lida
+# 	O estado atual
+	
+# - COMPORTAMENTO DO AGENTE:
+# 	Passando por leves oscilações, o agente tende a manter o estado, principalmente se estiver próximo da temperatura desejada, dessa maneira evita o acionamento/desligamento do sistema por pequenas variações. EX: 24,9°C, 25,1°C, pequenas variações em torno da temperatura desejada.
+	
+
+
+class AgenteTemperatura:
+    def __init__(self, temperatura_desejada=25, margem=1):
+        # estado interno
+        self.temperatura_desejada = temperatura_desejada
+        self.margem = margem
+        self.estado_sistema = "desligado"  # pode ser: ligado, desligado
+        self.ultima_acao = "desligar"
+
+    def perceber(self, ambiente):
+        # ambiente = temperatura atual
+        return {
+            "temperatura_atual": ambiente,
+            "temperatura_desejada": self.temperatura_desejada,
+            "estado_sistema": self.estado_sistema
+        }
+
+    def decidir(self, percepcao):
+        temp_atual = percepcao["temperatura_atual"]
+        temp_desejada = percepcao["temperatura_desejada"]
+
+        limite_superior = temp_desejada + self.margem
+        limite_inferior = temp_desejada - self.margem
+
+        # regras de decisão
+        if temp_atual > limite_superior:
+            return "ligar"
+        elif temp_atual < limite_inferior:
+            return "desligar"
+        else:
+            return "manter"
+
+    def agir(self, ambiente):
+        percepcao = self.perceber(ambiente)
+        acao = self.decidir(percepcao)
+
+        # atualiza estado interno
+        if acao == "ligar":
+            self.estado_sistema = "ligado"
+        elif acao == "desligar":
+            self.estado_sistema = "desligado"
+
+        self.ultima_acao = acao
+
+        return acao
+
+if __name__ == "__main__":
+    # 1. Instanciamos o agente
+    agente = AgenteTemperatura(temperatura_desejada=25, margem=1)
+    
+    # 2. Criamos uma lista de temperaturas simulando o passar do tempo
+    temperaturas_simuladas = [25.0, 25.5, 26.0, 26.1, 26.5, 25.8, 24.5, 24.0, 23.8, 24.2, 25.0]
+    
+    print("Iniciando simulação...\n")
+    print(f"Temperatura desejada: {agente.temperatura_desejada}°C")
+    print(f"Margem de tolerância: ±{agente.margem}°C\n")
+    
+    # 3. Fazemos um loop passando cada temperatura para o agente
+    for temp in temperaturas_simuladas:
+        acao = agente.agir(temp)
+        print(f"Ambiente: {temp}°C -> Ação: {acao.upper(): <8} | Estado: {agente.estado_sistema.upper()}")
