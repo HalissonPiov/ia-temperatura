@@ -10,14 +10,10 @@ if __name__ == "__main__":
     print(f"Temperatura desejada: {agente.temperatura_desejada}°C")
     print(f"Margem de tolerância: ±{agente.margem}°C\n")
 
-
     for temp in temperaturas_simuladas:
-        for tempo_espera in range(agente.tempo_espera_restante):
-            agente.tempo_espera_restante = agente.tempo_espera_restante -1 
-            time.sleep(1) 
-
         acao = agente.agir(temp)
         print(f"Ambiente: {temp}°C -> Ação: {acao.upper():<8} | Estado: {agente.estado_sistema.upper()}")
+        time.sleep(1)
 
     print("\nTaxas de resfriamento:", agente.taxas_resfriamento)
     print("Média taxa de resfriamento:", agente.media_taxa_resfriamento)
