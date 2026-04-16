@@ -1,6 +1,8 @@
 import statistics
+import time
+
 class AgenteTemperatura:
-    def __init__(self, temperatura_desejada=25, margem=1, k=1, alfa=0, beta=0):
+    def __init__(self, temperatura_atual, temperatura_desejada=25, margem=1, k=1, alfa=0, beta=0):
         self.k = k
         self.esta_temperatura_ideal = False
         self.temperatura_desejada = temperatura_desejada
@@ -8,12 +10,12 @@ class AgenteTemperatura:
         self.estado_sistema = "desligado"
         self.ultima_acao = "desligar"
         self.temperaturas_anteriores = []
-        self.temperatura_atual = self.temperatura_desejada
-        self.tempo_espera_restante = self.cal_tempo_espera()
+        self.temperatura_atual = temperatura_atual
+        self.tempo_espera_restante = self.cal_tempo_espera_inicial(temperatura_atual)
         self.variacao_temperatura = 0
         self.episodio_ativo = False
         self.tipo_episodio = ""
-        self.tempo_contador = 0
+        self.tempo_contador = 1
         self.t_inicio = 0
         self.taxas_resfriamento = []
         self.taxas_elevacao = []
@@ -23,9 +25,30 @@ class AgenteTemperatura:
         self.beta = beta
         self.sigma = 0
 
-    def cal_tempo_espera(self):
-        tempo_espera = self.k * abs(self.temperatura_atual - self.temperatura_desejada)
-        return tempo_espera
+    def cal_tempo_espera_inicial(self, temperatura_atual):
+        return round(self.k * abs(temperatura_atual - self.temperatura_desejada))
+        
+    
+    def cal_tempo_espera_medio(self, percepcao):
+        temp_atual = percepcao["temperatura_atual"]
+        temp_desejada = percepcao["temperatura_desejada"]
+
+        if self.estado_sistema == "ligado":
+            taxa = self.taxa_resfriamento()
+
+            if taxa > 0:
+                return round((temp_atual - temp_desejada) / taxa)
+            else:
+                return self.cal_tempo_espera_inicial(temp_atual)
+
+        else:
+            taxa = self.taxa_elevacao()
+
+            if taxa > 0:
+                return round((temp_desejada - temp_atual) / taxa)
+            else:
+                return self.cal_tempo_espera_inicial(temp_atual)
+
 
     def perceber(self, ambiente):
         return {
@@ -39,6 +62,7 @@ class AgenteTemperatura:
         temp_desejada = percepcao["temperatura_desejada"]
 
         self.temperaturas_anteriores.append(temp_atual)
+        self.tempo_espera_restante = self.cal_tempo_espera_medio(percepcao)
         self.calcular_sigma()
 
         if len(self.temperaturas_anteriores) > 1:
@@ -110,7 +134,6 @@ class AgenteTemperatura:
             self.estado_sistema = "desligado"
 
         self.ultima_acao = acao
-        self.tempo_espera_restante = self.cal_tempo_espera()
         return acao
 
     def aprendizado_termico(self):
@@ -118,19 +141,25 @@ class AgenteTemperatura:
             return
 
         if self.tipo_episodio == "resfriamento":
-            taxa = (self.t_inicio - self.temperatura_desejada) / self.tempo_contador
+            taxa = self.taxa_resfriamento()
             self.taxas_resfriamento.append(taxa)
             self.media_taxa_resfriamento = round(sum(self.taxas_resfriamento) / len(self.taxas_resfriamento), 2)
 
         elif self.tipo_episodio == "elevacao":
-            taxa = (self.temperatura_atual - self.t_inicio) / self.tempo_contador
+            taxa = self.taxa_elevacao()
             self.taxas_elevacao.append(taxa)
             self.media_taxa_elevacao = round(sum(self.taxas_elevacao) / len(self.taxas_elevacao), 2)
 
         self.episodio_ativo = False
         self.tipo_episodio = ""
-        self.tempo_contador = 0
+        self.tempo_contador = 1
         self.t_inicio = 0
+
+    def taxa_resfriamento(self):
+        return (self.t_inicio - self.temperatura_desejada) / self.tempo_contador
+    
+    def taxa_elevacao(self): 
+        return (self.temperatura_desejada - self.t_inicio) / self.tempo_contador
 
     def custo_situacao(self):
         J = abs(self.temperatura_atual - self.temperatura_desejada)
@@ -150,27 +179,3 @@ class AgenteTemperatura:
     def calculo_limite_superior(self):
         L = self.temperatura_desejada + 3*self.sigma
         return L
-
-if __name__ == "__main__":
-    agente = AgenteTemperatura(temperatura_desejada=25, margem=1, alfa=3, beta=0.5)
-
-    temperaturas_simuladas = [25.0, 25.5, 26.0, 26.1, 26.5, 25.8, 24.5, 24.0, 23.8, 24.2, 25.0]
-
-    print("Iniciando simulação...\n")
-    print(f"Temperatura desejada: {agente.temperatura_desejada}°C")
-    print(f"Margem de tolerância: ±{agente.margem}°C\n")
-
-    for temp in temperaturas_simuladas:
-        acao = agente.agir(temp)
-        print(f"Ambiente: {temp}°C -> Ação: {acao.upper():<8} | Estado: {agente.estado_sistema.upper()}")
-
-    print("\nTaxas de resfriamento:", agente.taxas_resfriamento)
-    print("Média taxa de resfriamento:", agente.media_taxa_resfriamento)
-    print("Taxas de elevação:", agente.taxas_elevacao)
-    print("Média taxa de elevação:", agente.media_taxa_elevacao)
-
-    custo = agente.custo_situacao()
-    print(f"Custo atual: {custo:.2f}")
-
-    print(f"Sigma atual: {agente.sigma:.2f}")
-    print(f"Limite superior calculado: {agente.calculo_limite_superior():.2f}")
