@@ -1,12 +1,12 @@
+import statistics
 class AgenteTemperatura:
-
     def __init__(self, temperatura_desejada=25, margem=1, k=1, alfa=0, beta=0):
         self.k = k
         self.esta_temperatura_ideal = False
         self.temperatura_desejada = temperatura_desejada
         self.margem = margem
         self.estado_sistema = "desligado"
-        self.ultima_acao = "desligar"   
+        self.ultima_acao = "desligar"
         self.temperaturas_anteriores = []
         self.temperatura_atual = self.temperatura_desejada
         self.tempo_espera_restante = self.cal_tempo_espera()
@@ -21,6 +21,7 @@ class AgenteTemperatura:
         self.media_taxa_elevacao = 0
         self.alfa = alfa
         self.beta = beta
+        self.sigma = 0
 
     def cal_tempo_espera(self):
         tempo_espera = self.k * abs(self.temperatura_atual - self.temperatura_desejada)
@@ -38,13 +39,14 @@ class AgenteTemperatura:
         temp_desejada = percepcao["temperatura_desejada"]
 
         self.temperaturas_anteriores.append(temp_atual)
+        self.calcular_sigma()
 
         if len(self.temperaturas_anteriores) > 1:
             temp_anterior = self.temperaturas_anteriores[-2]
         else:
             temp_anterior = temp_atual
 
-        limite_superior = temp_desejada + self.margem
+        limite_superior = self.calculo_limite_superior()
         limite_inferior = temp_desejada - self.margem
 
         if temp_atual > limite_superior:
@@ -139,6 +141,16 @@ class AgenteTemperatura:
             J = self.alfa * J
         return J
 
+    def calcular_sigma(self):
+        if len(self.temperaturas_anteriores) > 1:
+            self.sigma = statistics.pstdev(self.temperaturas_anteriores)
+        else:
+            self.sigma = 0
+
+    def calculo_limite_superior(self):
+        L = self.temperatura_desejada + 3*self.sigma
+        return L
+
 if __name__ == "__main__":
     agente = AgenteTemperatura(temperatura_desejada=25, margem=1, alfa=3, beta=0.5)
 
@@ -159,3 +171,6 @@ if __name__ == "__main__":
 
     custo = agente.custo_situacao()
     print(f"Custo atual: {custo:.2f}")
+
+    print(f"Sigma atual: {agente.sigma:.2f}")
+    print(f"Limite superior calculado: {agente.calculo_limite_superior():.2f}")
