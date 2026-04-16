@@ -13,7 +13,7 @@ if __name__ == "__main__":
     for temp in temperaturas_simuladas:
         acao = agente.agir(temp)
         print(f"Ambiente: {temp}°C -> Ação: {acao.upper():<8} | Estado: {agente.estado_sistema.upper()}")
-        time.sleep(1)
+        
 
     print("\nTaxas de resfriamento:", agente.taxas_resfriamento)
     print("Média taxa de resfriamento:", agente.media_taxa_resfriamento)

@@ -1,5 +1,4 @@
 import statistics
-import time
 
 class AgenteTemperatura:
     def __init__(self, temperatura_atual, temperatura_desejada=25, margem=1, k=1, alfa=0, beta=0):
@@ -93,9 +92,7 @@ class AgenteTemperatura:
                 self.aprendizado_termico()
             return "desligar"
 
-        elif self.estado_sistema == "desligado" and temp_atual > temp_anterior:
-            if self.episodio_ativo and self.tipo_episodio == "resfriamento":
-                self.aprendizado_termico()
+        elif temp_atual < limite_inferior and self.estado_sistema == "desligado":
             self.tipo_episodio = "elevacao"
 
             if self.episodio_ativo:
@@ -114,15 +111,30 @@ class AgenteTemperatura:
             return "desligar"
 
         else:
-            if self.episodio_ativo and self.tipo_episodio == "elevacao":
-                self.aprendizado_termico()
-            self.esta_temperatura_ideal = True
+            self.episodio_ativo = True
+            if temp_atual < temp_anterior:
+                if self.tipo_episodio == "elevacao":
+                    self.aprendizado_termico()
+                    self.tempo_contador = 1
+                    self.tipo_episodio = "resfriamento"
+                else:
+                    self.tempo_contador += 1 
+                    self.tipo_episodio = "resfriamento"
+
+            if temp_atual > temp_anterior:
+                if self.tipo_episodio == "resfriamento":
+                    self.aprendizado_termico()
+                    self.tempo_contador = 1
+                    self.tipo_episodio = "elevacao"
+                else:
+                    self.tempo_contador += 1
+                    self.tipo_episodio = "elevacao"
+                
             return "manter"
 
     def agir(self, ambiente):
-        if self.tempo_espera_restante > 0:
-            self.tempo_espera_restante -= 1
-            return "manter"
+        for tempo in range(self.tempo_espera_restante):
+            self.tempo_espera_restante -= 1 
 
         self.temperatura_atual = ambiente
         percepcao = self.perceber(ambiente)
@@ -177,5 +189,5 @@ class AgenteTemperatura:
             self.sigma = 0
 
     def calculo_limite_superior(self):
-        L = self.temperatura_desejada + 3*self.sigma
+        L = self.temperatura_desejada + 2*self.sigma
         return L
