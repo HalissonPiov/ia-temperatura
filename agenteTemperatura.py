@@ -1,12 +1,12 @@
 class AgenteTemperatura:
 
-    def __init__(self, temperatura_desejada=25, margem=1, k=1):
+    def __init__(self, temperatura_desejada=25, margem=1, k=1, alfa=0, beta=0):
         self.k = k
         self.esta_temperatura_ideal = False
         self.temperatura_desejada = temperatura_desejada
         self.margem = margem
         self.estado_sistema = "desligado"
-        self.ultima_acao = "desligar"
+        self.ultima_acao = "desligar"   
         self.temperaturas_anteriores = []
         self.temperatura_atual = self.temperatura_desejada
         self.tempo_espera_restante = self.cal_tempo_espera()
@@ -19,6 +19,8 @@ class AgenteTemperatura:
         self.taxas_elevacao = []
         self.media_taxa_resfriamento = 0
         self.media_taxa_elevacao = 0
+        self.alfa = alfa
+        self.beta = beta
 
     def cal_tempo_espera(self):
         tempo_espera = self.k * abs(self.temperatura_atual - self.temperatura_desejada)
@@ -128,8 +130,17 @@ class AgenteTemperatura:
         self.tempo_contador = 0
         self.t_inicio = 0
 
+    def custo_situacao(self):
+        J = abs(self.temperatura_atual - self.temperatura_desejada)
+
+        if self.estado_sistema == "ligado":
+            J = self.alfa * J + self.beta * 1
+        else:
+            J = self.alfa * J
+        return J
+
 if __name__ == "__main__":
-    agente = AgenteTemperatura(temperatura_desejada=25, margem=1)
+    agente = AgenteTemperatura(temperatura_desejada=25, margem=1, alfa=3, beta=0.5)
 
     temperaturas_simuladas = [25.0, 25.5, 26.0, 26.1, 26.5, 25.8, 24.5, 24.0, 23.8, 24.2, 25.0]
 
@@ -145,3 +156,6 @@ if __name__ == "__main__":
     print("Média taxa de resfriamento:", agente.media_taxa_resfriamento)
     print("Taxas de elevação:", agente.taxas_elevacao)
     print("Média taxa de elevação:", agente.media_taxa_elevacao)
+
+    custo = agente.custo_situacao()
+    print(f"Custo atual: {custo:.2f}")
