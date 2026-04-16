@@ -1,4 +1,4 @@
-# Esse é um agente inteligência responsável por medir, monitorar e regular a temperatura de um ambiente de um local. Seu objetivo é manter a temperatura no valor pré-estabelecido e assim, ele é capaz de ativar o sistema de aquecimento ou resfriamento conforme a temperatura varia de acordo com o tempo.
+# Esse é um agente inteligência responsável por medir, monitorar e regular a temperatura de um ambiente de um local. Seu objetivo é manter a temperatura no valor pré-estabelecido e assim, ele é capaz de ativar o sistema de resfriamento conforme a temperatura varia de acordo com o tempo. OBS: Esse agente é reposável apenas pelo resfriamento do ambiente.
 
 # - temperatura atual
 # - temperatura desejada: 25°C - tolerância entre 24°C e 26°C
@@ -21,15 +21,22 @@
 
 
 class AgenteTemperatura:
-    def __init__(self, temperatura_desejada=25, margem=1):
-        # estado interno
+
+    def __init__(self, temperatura_desejada=25, margem=1, k=1):
+        self.k = k
+        self.esta_temperatura_ideal = False
+        self.tempo_espera_restante = self.cal_tempo_espera()
         self.temperatura_desejada = temperatura_desejada
         self.margem = margem
-        self.estado_sistema = "desligado"  # pode ser: ligado, desligado
+        self.estado_sistema = "desligado"  
         self.ultima_acao = "desligar"
+        self.temperaturas_anteriores = []
+        self.temperatura_atual
+
+    def cal_tempo_espera(self):
+        return self.k * (self.temperatura_atual - self.temperatura_desejada)
 
     def perceber(self, ambiente):
-        # ambiente = temperatura atual
         return {
             "temperatura_atual": ambiente,
             "temperatura_desejada": self.temperatura_desejada,
@@ -37,6 +44,8 @@ class AgenteTemperatura:
         }
 
     def decidir(self, percepcao):
+        self.temperaturas_anteriores.append(temp_atual)
+
         temp_atual = percepcao["temperatura_atual"]
         temp_desejada = percepcao["temperatura_desejada"]
 
@@ -46,10 +55,17 @@ class AgenteTemperatura:
         # regras de decisão
         if temp_atual > limite_superior:
             return "ligar"
-        elif temp_atual < limite_inferior:
+        elif temp_atual < limite_inferior and self.estado_sistema == "ligado" :
+            return "desligar"
+        elif temp_atual < limite_inferior and self.estado_sistema == "desligado" :
+            return "manter"
+        elif temp_atual >= limite_inferior and temp_atual <= limite_superior and self.estado_sistema == "ligado" :
+            self.esta_temperatura_ideal = True
             return "desligar"
         else:
+            self.esta_temperatura_ideal = True
             return "manter"
+
 
     def agir(self, ambiente):
         percepcao = self.perceber(ambiente)
@@ -65,18 +81,25 @@ class AgenteTemperatura:
 
         return acao
 
+    # def espisodio_refriamento(self):
+    #     return self. - self.temperatura_desejada / 
+
+
 if __name__ == "__main__":
-    # 1. Instanciamos o agente
+    
     agente = AgenteTemperatura(temperatura_desejada=25, margem=1)
     
-    # 2. Criamos uma lista de temperaturas simulando o passar do tempo
     temperaturas_simuladas = [25.0, 25.5, 26.0, 26.1, 26.5, 25.8, 24.5, 24.0, 23.8, 24.2, 25.0]
     
     print("Iniciando simulação...\n")
     print(f"Temperatura desejada: {agente.temperatura_desejada}°C")
     print(f"Margem de tolerância: ±{agente.margem}°C\n")
     
-    # 3. Fazemos um loop passando cada temperatura para o agente
+
     for temp in temperaturas_simuladas:
+        while agente.tempo_espera_restante > 0:
+            agente.tempo_espera_restante = agente.tempo_espera_restante-1
+            continue
+
         acao = agente.agir(temp)
         print(f"Ambiente: {temp}°C -> Ação: {acao.upper(): <8} | Estado: {agente.estado_sistema.upper()}")
