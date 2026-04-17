@@ -1,383 +1,368 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agente Inteligente de Temperatura</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 </head>
+
 <body class="bg-gray-50 text-gray-800 font-sans p-6 min-h-screen">
 
     <div class="max-w-6xl mx-auto space-y-6">
         <header class="border-b pb-4 mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">Monitoramento do Agente Inteligente de Temperatura</h1>
-            <p class="text-gray-500 text-sm mt-1">Simulação baseada no algoritmo do Agente Inteligente.</p>
+            <h1 class="text-3xl font-bold text-gray-900">Monitoramento do Agente de Temperatura</h1>
+            <p class="text-gray-500 text-sm mt-1">Lógica 100% em Python, rodando nativamente no navegador (Single File).
+            </p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 lg:col-span-1">
-                <h2 class="text-lg font-semibold mb-4 text-indigo-600">Parâmetros de Inicialização</h2>
-                
+                <h2 class="text-lg font-semibold mb-4 text-indigo-600">Parâmetros (Input)</h2>
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-medium text-gray-700">Temperatura Desejada (°C)</label>
-                        <input type="number" id="temp_desejada" value="25" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                        <input type="number" id="temp_desejada" value="25"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700">Margem de Tolerância (±)</label>
-                        <input type="number" id="margem" value="1" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                        <input type="number" id="margem" value="1" step="0.1"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-gray-700">Alfa</label>
-                            <input type="number" id="alfa" value="3" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                            <input type="number" id="alfa" value="3" step="0.1"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-700">Beta</label>
-                            <input type="number" id="beta" value="0.5" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                            <input type="number" id="beta" value="0.5" step="0.1"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-700">Temperaturas Simuladas (separadas por vírgula)</label>
-                        <textarea id="temp_simuladas" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">25.0, 25.5, 26.0, 26.1, 26.5, 25.8, 24.5, 24.0, 23.8, 24.2, 25.0</textarea>
+                        <label class="block text-xs font-medium text-gray-700">Temperaturas Simuladas</label>
+                        <textarea id="temp_simuladas" rows="3"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">25.0, 25.5, 26.0, 26.1, 26.5, 25.8, 24.5, 24.0, 23.8, 24.2, 25.0</textarea>
                     </div>
 
-                    <button onclick="executarSimulacao()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                        Executar Simulação
+                    <button py-click="executar_simulacao"
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                        Processar no Python
                     </button>
                 </div>
             </div>
 
             <div class="lg:col-span-2 space-y-6">
-                
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h2 class="text-lg font-semibold mb-4 text-indigo-600">Evolução Térmica</h2>
                     <canvas id="temperaturaChart" width="400" height="150"></canvas>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="metricas_container">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
                         <span class="block text-xs text-gray-500 uppercase font-semibold">Média Resfriamento</span>
-                        <span class="block text-2xl font-bold text-blue-600" id="metrica_media_resfriamento">0</span>
+                        <span class="block text-2xl font-bold text-blue-600" id="metrica_resfriamento">-</span>
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
                         <span class="block text-xs text-gray-500 uppercase font-semibold">Média Elevação</span>
-                        <span class="block text-2xl font-bold text-red-500" id="metrica_media_elevacao">0</span>
+                        <span class="block text-2xl font-bold text-red-500" id="metrica_elevacao">-</span>
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
                         <span class="block text-xs text-gray-500 uppercase font-semibold">Custo Situação</span>
-                        <span class="block text-2xl font-bold text-gray-800" id="metrica_custo">0.00</span>
+                        <span class="block text-2xl font-bold text-gray-800" id="metrica_custo">-</span>
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
                         <span class="block text-xs text-gray-500 uppercase font-semibold">Sigma Atual</span>
-                        <span class="block text-2xl font-bold text-purple-600" id="metrica_sigma">0.00</span>
+                        <span class="block text-2xl font-bold text-purple-600" id="metrica_sigma">-</span>
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center md:col-span-4">
-                        <span class="block text-xs text-gray-500 uppercase font-semibold">Limite Superior Calculado</span>
-                        <span class="block text-2xl font-bold text-orange-500" id="metrica_limite">0.00</span>
+                        <span class="block text-xs text-gray-500 uppercase font-semibold">Limite Superior
+                            Calculado</span>
+                        <span class="block text-2xl font-bold text-orange-500" id="metrica_limite">-</span>
                     </div>
                 </div>
-
             </div>
         </div>
 
-        <div class="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-6">
-            <h2 class="text-lg font-semibold mb-4 text-white">Log de Ações do Agente</h2>
+        <div class="bg-gray-900 rounded-xl shadow-sm border p-6 mt-6">
             <div id="terminal_log" class="font-mono text-sm text-green-400 h-48 overflow-y-auto space-y-1">
-                Aguardando inicialização...
+                O PyScript está carregando o ambiente Python no seu navegador. Aguarde alguns segundos...
             </div>
         </div>
-
     </div>
 
     <script>
-        // Função utilitária para calcular Desvio Padrão Populacional (pstdev)
-        function calcularPstdev(arr) {
-            if (arr.length <= 1) return 0;
-            const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
-            const variance = arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / arr.length;
-            return Math.sqrt(variance);
-        }
-
-        // Classe AgenteTemperatura (Tradução exata do seu Python)
-        class AgenteTemperatura {
-            constructor(temperatura_atual, temperatura_desejada = 25, margem = 1, k = 1, alfa = 0, beta = 0) {
-                this.k = k;
-                this.esta_temperatura_ideal = false;
-                this.temperatura_desejada = temperatura_desejada;
-                this.margem = margem;
-                this.estado_sistema = "desligado";
-                this.ultima_acao = "desligar";
-                this.temperaturas_anteriores = [];
-                this.temperatura_atual = temperatura_atual;
-                this.tempo_espera_restante = this.cal_tempo_espera_inicial(temperatura_atual);
-                this.variacao_temperatura = 0;
-                this.episodio_ativo = false;
-                this.tipo_episodio = "";
-                this.tempo_contador = 1;
-                this.t_inicio = 0;
-                this.taxas_resfriamento = [];
-                this.taxas_elevacao = [];
-                this.media_taxa_resfriamento = 0;
-                this.media_taxa_elevacao = 0;
-                this.alfa = alfa;
-                this.beta = beta;
-                this.sigma = 0;
-            }
-
-            cal_tempo_espera_inicial(temperatura_atual) {
-                return Math.round(this.k * Math.abs(temperatura_atual - this.temperatura_desejada));
-            }
-
-            cal_tempo_espera_medio(percepcao) {
-                let temp_atual = percepcao.temperatura_atual;
-                let temp_desejada = percepcao.temperatura_desejada;
-
-                if (this.estado_sistema === "ligado") {
-                    let taxa = this.taxa_resfriamento();
-                    if (taxa > 0) return Math.round((temp_atual - temp_desejada) / taxa);
-                    else return this.cal_tempo_espera_inicial(temp_atual);
-                } else {
-                    let taxa = this.taxa_elevacao();
-                    if (taxa > 0) return Math.round((temp_desejada - temp_atual) / taxa);
-                    else return this.cal_tempo_espera_inicial(temp_atual);
-                }
-            }
-
-            perceber(ambiente) {
-                return {
-                    temperatura_atual: ambiente,
-                    temperatura_desejada: this.temperatura_desejada,
-                    estado_sistema: this.estado_sistema
-                };
-            }
-
-            decidir(percepcao) {
-                let temp_atual = percepcao.temperatura_atual;
-                let temp_desejada = percepcao.temperatura_desejada;
-
-                this.temperaturas_anteriores.push(temp_atual);
-                this.tempo_espera_restante = this.cal_tempo_espera_medio(percepcao);
-                this.calcular_sigma();
-
-                let temp_anterior = this.temperaturas_anteriores.length > 1 
-                                    ? this.temperaturas_anteriores[this.temperaturas_anteriores.length - 2] 
-                                    : temp_atual;
-
-                let limite_superior = this.calculo_limite_superior();
-                let limite_inferior = temp_desejada - this.margem;
-
-                if (temp_atual > limite_superior) {
-                    if (this.episodio_ativo && this.tipo_episodio === "elevacao") this.aprendizado_termico();
-                    this.tipo_episodio = "resfriamento";
-                    if (this.episodio_ativo) {
-                        this.tempo_contador += 1;
-                        return "manter";
-                    } else {
-                        this.episodio_ativo = true;
-                        this.t_inicio = temp_atual;
-                        this.tempo_contador = 1;
-                        return "ligar";
-                    }
-                } else if (temp_atual < limite_inferior && this.estado_sistema === "ligado") {
-                    if (this.episodio_ativo && this.tipo_episodio === "resfriamento") this.aprendizado_termico();
-                    return "desligar";
-                } else if (temp_atual < limite_inferior && this.estado_sistema === "desligado") {
-                    this.tipo_episodio = "elevacao";
-                    if (this.episodio_ativo) this.tempo_contador += 1;
-                    else {
-                        this.episodio_ativo = true;
-                        this.t_inicio = temp_atual;
-                        this.tempo_contador = 1;
-                    }
-                    return "manter";
-                } else if (temp_atual >= limite_inferior && temp_atual <= limite_superior && this.estado_sistema === "ligado") {
-                    if (this.episodio_ativo && this.tipo_episodio === "resfriamento") this.aprendizado_termico();
-                    this.esta_temperatura_ideal = true;
-                    return "desligar";
-                } else {
-                    this.episodio_ativo = true;
-                    if (temp_atual < temp_anterior) {
-                        if (this.tipo_episodio === "elevacao") {
-                            this.aprendizado_termico();
-                            this.tempo_contador = 1;
-                            this.tipo_episodio = "resfriamento";
-                        } else {
-                            this.tempo_contador += 1;
-                            this.tipo_episodio = "resfriamento";
-                        }
-                    }
-                    if (temp_atual > temp_anterior) {
-                        if (this.tipo_episodio === "resfriamento") {
-                            this.aprendizado_termico();
-                            this.tempo_contador = 1;
-                            this.tipo_episodio = "elevacao";
-                        } else {
-                            this.tempo_contador += 1;
-                            this.tipo_episodio = "elevacao";
-                        }
-                    }
-                    return "manter";
-                }
-            }
-
-            agir(ambiente) {
-                for (let tempo = 0; tempo < this.tempo_espera_restante; tempo++) {
-                    // Loop simulado de decréscimo
-                }
-                this.tempo_espera_restante = 0; // Simplificação do loop acima em JS
-
-                this.temperatura_atual = ambiente;
-                let percepcao = this.perceber(ambiente);
-                let acao = this.decidir(percepcao);
-
-                if (acao === "ligar") this.estado_sistema = "ligado";
-                else if (acao === "desligar") this.estado_sistema = "desligado";
-
-                this.ultima_acao = acao;
-                return acao;
-            }
-
-            aprendizado_termico() {
-                if (this.tempo_contador <= 0) return;
-
-                if (this.tipo_episodio === "resfriamento") {
-                    let taxa = this.taxa_resfriamento();
-                    this.taxas_resfriamento.push(taxa);
-                    let sum = this.taxas_resfriamento.reduce((a, b) => a + b, 0);
-                    this.media_taxa_resfriamento = parseFloat((sum / this.taxas_resfriamento.length).toFixed(2));
-                } else if (this.tipo_episodio === "elevacao") {
-                    let taxa = this.taxa_elevacao();
-                    this.taxas_elevacao.push(taxa);
-                    let sum = this.taxas_elevacao.reduce((a, b) => a + b, 0);
-                    this.media_taxa_elevacao = parseFloat((sum / this.taxas_elevacao.length).toFixed(2));
-                }
-
-                this.episodio_ativo = false;
-                this.tipo_episodio = "";
-                this.tempo_contador = 1;
-                this.t_inicio = 0;
-            }
-
-            taxa_resfriamento() {
-                return (this.t_inicio - this.temperatura_desejada) / this.tempo_contador;
-            }
-
-            taxa_elevacao() {
-                return (this.temperatura_desejada - this.t_inicio) / this.tempo_contador;
-            }
-
-            custo_situacao() {
-                let J = Math.abs(this.temperatura_atual - this.temperatura_desejada);
-                if (this.estado_sistema === "ligado") J = this.alfa * J + this.beta * 1;
-                else J = this.alfa * J;
-                return J;
-            }
-
-            calcular_sigma() {
-                this.sigma = calcularPstdev(this.temperaturas_anteriores);
-            }
-
-            calculo_limite_superior() {
-                return this.temperatura_desejada + 2 * this.sigma;
-            }
-        }
-
-        // Variável global do gráfico
         let grafico;
-
         function inicializarGrafico() {
             const ctx = document.getElementById('temperaturaChart').getContext('2d');
             grafico = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Temperatura Ambiental (°C)',
-                        data: [],
-                        borderColor: 'rgb(79, 70, 229)',
-                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    },
-                    {
-                        label: 'Temp. Desejada',
-                        data: [],
-                        borderColor: 'rgb(34, 197, 94)',
-                        borderDash: [5, 5],
-                        borderWidth: 2,
-                        pointRadius: 0
-                    }]
+                    labels: [], datasets: [
+                        { label: 'Temperatura Ambiental (°C)', data: [], borderColor: 'rgb(79, 70, 229)', backgroundColor: 'rgba(79, 70, 229, 0.1)', tension: 0.3, fill: true },
+                        { label: 'Temp. Desejada', data: [], borderColor: 'rgb(34, 197, 94)', borderDash: [5, 5], borderWidth: 2, pointRadius: 0 }
+                    ]
                 },
-                options: {
-                    responsive: true,
-                    scales: { y: { suggestedMin: 23, suggestedMax: 28 } }
-                }
+                options: { responsive: true, scales: { y: { suggestedMin: 23, suggestedMax: 28 } } }
             });
+            document.getElementById('terminal_log').innerHTML = "> Ambiente carregado! Pronto para iniciar simulação.";
         }
-
-        // Executar simulação e atualizar UI
-        function executarSimulacao() {
-            // Limpar terminal e gráfico
-            document.getElementById('terminal_log').innerHTML = '';
-            
-            // Coletar inputs
-            const temp_desejada = parseFloat(document.getElementById('temp_desejada').value);
-            const margem = parseFloat(document.getElementById('margem').value);
-            const alfa = parseFloat(document.getElementById('alfa').value);
-            const beta = parseFloat(document.getElementById('beta').value);
-            
-            const raw_simuladas = document.getElementById('temp_simuladas').value;
-            const temperaturas_simuladas = raw_simuladas.split(',').map(n => parseFloat(n.trim()));
-
-            // Instanciar Agente
-            const agente = new AgenteTemperatura(temperaturas_simuladas[0], temp_desejada, margem, 1, alfa, beta);
-
-            let logsHTML = `> Iniciando simulação...<br>`;
-            logsHTML += `> Temperatura desejada: ${agente.temperatura_desejada}°C<br>`;
-            logsHTML += `> Margem de tolerância: ±${agente.margem}°C<br><br>`;
-
-            let labels = [];
-            let dadosTemperatura = [];
-            let dadosDesejada = [];
-
-            // Rodar loop de temperaturas (equivalente ao main.py)
-            temperaturas_simuladas.forEach((temp, index) => {
-                let acao = agente.agir(temp);
-                
-                // Atualizar Terminal
-                let acaoFormatada = acao.toUpperCase().padEnd(8, ' ');
-                logsHTML += `Ambiente: ${temp.toFixed(1)}°C -> Ação: ${acaoFormatada} | Estado: ${agente.estado_sistema.toUpperCase()}<br>`;
-                
-                // Dados para o Gráfico
-                labels.push(`Passo ${index + 1}`);
-                dadosTemperatura.push(temp);
-                dadosDesejada.push(temp_desejada);
-            });
-
-            // Imprimir Log na tela
-            document.getElementById('terminal_log').innerHTML = logsHTML;
-
-            // Atualizar Métricas na tela
-            document.getElementById('metrica_media_resfriamento').innerText = agente.media_taxa_resfriamento.toFixed(2);
-            document.getElementById('metrica_media_elevacao').innerText = agente.media_taxa_elevacao.toFixed(2);
-            document.getElementById('metrica_custo').innerText = agente.custo_situacao().toFixed(2);
-            document.getElementById('metrica_sigma').innerText = agente.sigma.toFixed(2);
-            document.getElementById('metrica_limite').innerText = agente.calculo_limite_superior().toFixed(2);
-
-            // Atualizar Gráfico
-            if(grafico) grafico.destroy();
-            inicializarGrafico();
-            grafico.data.labels = labels;
-            grafico.data.datasets[0].data = dadosTemperatura;
-            grafico.data.datasets[1].data = dadosDesejada;
-            grafico.update();
-        }
-
-        // Iniciar gráfico vazio no load da página
         window.onload = inicializarGrafico;
+
+        window.atualizarInterface = function (jsonResultados) {
+            const dados = JSON.parse(jsonResultados);
+
+            document.getElementById('terminal_log').innerHTML = dados.logs;
+            document.getElementById('metrica_resfriamento').innerText = dados.metricas.media_resfriamento;
+            document.getElementById('metrica_elevacao').innerText = dados.metricas.media_elevacao;
+            document.getElementById('metrica_custo').innerText = dados.metricas.custo;
+            document.getElementById('metrica_sigma').innerText = dados.metricas.sigma;
+            document.getElementById('metrica_limite').innerText = dados.metricas.limite;
+
+            grafico.data.labels = dados.grafico.labels;
+            grafico.data.datasets[0].data = dados.grafico.dados_temperatura;
+            grafico.data.datasets[1].data = dados.grafico.dados_desejada;
+            grafico.update();
+        };
     </script>
+
+    <script type="py">
+    import json
+    import statistics
+    from pyscript import document, window
+
+    class AgenteTemperatura:
+        def __init__(self, temperatura_atual, temperatura_desejada=25, margem=1, k=1, alfa=0, beta=0):
+            self.k = k
+            self.esta_temperatura_ideal = False
+            self.temperatura_desejada = temperatura_desejada
+            self.margem = margem
+            self.estado_sistema = "desligado"
+            self.ultima_acao = "desligar"
+            self.temperaturas_anteriores = []
+            self.temperatura_atual = temperatura_atual
+            self.tempo_espera_restante = self.cal_tempo_espera_inicial(temperatura_atual)
+            self.variacao_temperatura = 0
+            self.episodio_ativo = False
+            self.tipo_episodio = ""
+            self.tempo_contador = 1
+            self.t_inicio = 0
+            self.taxas_resfriamento = []
+            self.taxas_elevacao = []
+            self.media_taxa_resfriamento = 0
+            self.media_taxa_elevacao = 0
+            self.alfa = alfa
+            self.beta = beta
+            self.sigma = 0
+
+        def cal_tempo_espera_inicial(self, temperatura_atual):
+            return round(self.k * abs(temperatura_atual - self.temperatura_desejada))
+            
+        def cal_tempo_espera_medio(self, percepcao):
+            temp_atual = percepcao["temperatura_atual"]
+            temp_desejada = percepcao["temperatura_desejada"]
+
+            if self.estado_sistema == "ligado":
+                taxa = self.taxa_resfriamento()
+                if taxa > 0:
+                    return round((temp_atual - temp_desejada) / taxa)
+                else:
+                    return self.cal_tempo_espera_inicial(temp_atual)
+            else:
+                taxa = self.taxa_elevacao()
+                if taxa > 0:
+                    return round((temp_desejada - temp_atual) / taxa)
+                else:
+                    return self.cal_tempo_espera_inicial(temp_atual)
+
+        def perceber(self, ambiente):
+            return {
+                "temperatura_atual": ambiente,
+                "temperatura_desejada": self.temperatura_desejada,
+                "estado_sistema": self.estado_sistema
+            }
+
+        def decidir(self, percepcao):
+            temp_atual = percepcao["temperatura_atual"]
+            temp_desejada = percepcao["temperatura_desejada"]
+
+            self.temperaturas_anteriores.append(temp_atual)
+            self.tempo_espera_restante = self.cal_tempo_espera_medio(percepcao)
+            self.calcular_sigma()
+
+            if len(self.temperaturas_anteriores) > 1:
+                temp_anterior = self.temperaturas_anteriores[-2]
+            else:
+                temp_anterior = temp_atual
+
+            limite_superior = self.calculo_limite_superior()
+            limite_inferior = temp_desejada - self.margem
+
+            if temp_atual > limite_superior:
+                if self.episodio_ativo and self.tipo_episodio == "elevacao":
+                    self.aprendizado_termico()
+                self.tipo_episodio = "resfriamento"
+                if self.episodio_ativo:
+                    self.tempo_contador += 1
+                    return "manter"
+                else:
+                    self.episodio_ativo = True
+                    self.t_inicio = temp_atual
+                    self.tempo_contador = 1
+                    return "ligar"
+            elif temp_atual < limite_inferior and self.estado_sistema == "ligado":
+                if self.episodio_ativo and self.tipo_episodio == "resfriamento":
+                    self.aprendizado_termico()
+                return "desligar"
+            elif temp_atual < limite_inferior and self.estado_sistema == "desligado":
+                self.tipo_episodio = "elevacao"
+                if self.episodio_ativo:
+                    self.tempo_contador += 1
+                else:
+                    self.episodio_ativo = True
+                    self.t_inicio = temp_atual
+                    self.tempo_contador = 1
+                return "manter"
+            elif limite_inferior <= temp_atual <= limite_superior and self.estado_sistema == "ligado":
+                if self.episodio_ativo and self.tipo_episodio == "resfriamento":
+                    self.aprendizado_termico()
+                self.esta_temperatura_ideal = True
+                return "desligar"
+            else:
+                self.episodio_ativo = True
+                if temp_atual < temp_anterior:
+                    if self.tipo_episodio == "elevacao":
+                        self.aprendizado_termico()
+                        self.tempo_contador = 1
+                        self.tipo_episodio = "resfriamento"
+                    else:
+                        self.tempo_contador += 1 
+                        self.tipo_episodio = "resfriamento"
+                if temp_atual > temp_anterior:
+                    if self.tipo_episodio == "resfriamento":
+                        self.aprendizado_termico()
+                        self.tempo_contador = 1
+                        self.tipo_episodio = "elevacao"
+                    else:
+                        self.tempo_contador += 1
+                        self.tipo_episodio = "elevacao"
+                return "manter"
+
+        def agir(self, ambiente):
+            for tempo in range(self.tempo_espera_restante):
+                self.tempo_espera_restante -= 1 
+
+            self.temperatura_atual = ambiente
+            percepcao = self.perceber(ambiente)
+            acao = self.decidir(percepcao)
+
+            if acao == "ligar":
+                self.estado_sistema = "ligado"
+            elif acao == "desligar":
+                self.estado_sistema = "desligado"
+
+            self.ultima_acao = acao
+            return acao
+
+        def aprendizado_termico(self):
+            if self.tempo_contador <= 0:
+                return
+            if self.tipo_episodio == "resfriamento":
+                taxa = self.taxa_resfriamento()
+                self.taxas_resfriamento.append(taxa)
+                self.media_taxa_resfriamento = round(sum(self.taxas_resfriamento) / len(self.taxas_resfriamento), 2)
+            elif self.tipo_episodio == "elevacao":
+                taxa = self.taxa_elevacao()
+                self.taxas_elevacao.append(taxa)
+                self.media_taxa_elevacao = round(sum(self.taxas_elevacao) / len(self.taxas_elevacao), 2)
+
+            self.episodio_ativo = False
+            self.tipo_episodio = ""
+            self.tempo_contador = 1
+            self.t_inicio = 0
+
+        def taxa_resfriamento(self):
+            return (self.t_inicio - self.temperatura_desejada) / self.tempo_contador
+        
+        def taxa_elevacao(self): 
+            return (self.temperatura_desejada - self.t_inicio) / self.tempo_contador
+
+        def custo_situacao(self):
+            J = abs(self.temperatura_atual - self.temperatura_desejada)
+            if self.estado_sistema == "ligado":
+                J = self.alfa * J + self.beta * 1
+            else:
+                J = self.alfa * J
+            return J
+
+        def calcular_sigma(self):
+            if len(self.temperaturas_anteriores) > 1:
+                self.sigma = statistics.pstdev(self.temperaturas_anteriores)
+            else:
+                self.sigma = 0
+
+        def calculo_limite_superior(self):
+            L = self.temperatura_desejada + 2*self.sigma
+            return L
+
+
+    # Ponte HTML -> Python -> HTML
+    def executar_simulacao(e):
+        temp_desejada = float(document.getElementById('temp_desejada').value)
+        margem = float(document.getElementById('margem').value)
+        alfa = float(document.getElementById('alfa').value)
+        beta = float(document.getElementById('beta').value)
+        
+        raw_simuladas = document.getElementById('temp_simuladas').value
+        temperaturas_simuladas = [float(x.strip()) for x in raw_simuladas.split(',')]
+
+        agente = AgenteTemperatura(
+            temperatura_atual=temperaturas_simuladas[0], 
+            temperatura_desejada=temp_desejada, 
+            margem=margem, 
+            alfa=alfa, 
+            beta=beta
+        )
+
+        logs_html = f"> Iniciando simulação...<br>> Temperatura desejada: {temp_desejada}°C<br>> Margem de tolerância: ±{margem}°C<br><br>"
+        labels = []
+        dados_temperatura = []
+        dados_desejada = []
+
+        for i, temp in enumerate(temperaturas_simuladas):
+            acao = agente.agir(temp)
+            logs_html += f"Ambiente: {temp:.1f}°C -> Ação: {acao.upper().ljust(8)} | Estado: {agente.estado_sistema.upper()}<br>"
+            
+            labels.append(f"Passo {i+1}")
+            dados_temperatura.append(temp)
+            dados_desejada.append(temp_desejada)
+
+        resultados = {
+            "logs": logs_html,
+            "metricas": {
+                "media_resfriamento": f"{agente.media_taxa_resfriamento:.2f}",
+                "media_elevacao": f"{agente.media_taxa_elevacao:.2f}",
+                "custo": f"{agente.custo_situacao():.2f}",
+                "sigma": f"{agente.sigma:.2f}",
+                "limite": f"{agente.calculo_limite_superior():.2f}"
+            },
+            "grafico": {
+                "labels": labels,
+                "dados_temperatura": dados_temperatura,
+                "dados_desejada": dados_desejada
+            }
+        }
+
+        window.atualizarInterface(json.dumps(resultados))
+        </script>
 </body>
+
 </html>
