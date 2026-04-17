@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agente de Temperatura</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans p-6 min-h-screen">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        <header class="border-b pb-4 mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">Agente de Temperatura</h1>
+            <p class="text-gray-500 text-sm mt-1">Sistema Inteligente de Monitoramento e Controle Térmico.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 lg:col-span-1">
+                <h2 class="text-lg font-semibold mb-4 text-indigo-600">Parâmetros (Input)</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">Temperatura Desejada (Td)</label>
+                        <input type="number" id="temp_desejada" value="24" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700">Sigma (σ)</label>
+                            <input type="number" id="sigma" value="1.0" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700">Constante (k)</label>
+                            <input type="number" id="k_val" value="1.0" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700">Alpha (α)</label>
+                            <input type="number" id="alpha" value="2.0" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700">Beta (β)</label>
+                            <input type="number" id="beta" value="1.0" step="0.1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">Temperaturas Simuladas (Ta)</label>
+                        <textarea id="temp_simuladas" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border text-xs">30.0, 29.5, 28.8, 27.9, 26.5, 25.0, 24.2, 23.7, 23.5, 23.8, 24.1, 24.7, 25.2, 26.0</textarea>
+                    </div>
+
+                    <button py-click="executar_simulacao" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md">
+                        Processar no Python
+                    </button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <canvas id="temperaturaChart" width="400" height="120"></canvas>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+                        <span class="block text-xs text-gray-500 uppercase font-semibold">Média Resfriamento</span>
+                        <span class="block text-2xl font-bold text-blue-600" id="metrica_resfriamento">-</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+                        <span class="block text-xs text-gray-500 uppercase font-semibold">Média Elevação</span>
+                        <span class="block text-2xl font-bold text-orange-500" id="metrica_elevacao">-</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+                        <span class="block text-xs text-gray-500 uppercase font-semibold">Custo Final</span>
+                        <span class="block text-2xl font-bold text-gray-800" id="metrica_custo">-</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+                        <span class="block text-xs text-gray-500 uppercase font-semibold">Sigma Configurado</span>
+                        <span class="block text-2xl font-bold text-purple-600" id="metrica_sigma">-</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center bg-red-50">
+                        <span class="block text-xs text-red-500 uppercase font-semibold">Limite Superior (Td+3σ)</span>
+                        <span class="block text-2xl font-bold text-red-600" id="metrica_limite">-</span>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900 rounded-xl shadow-lg border border-gray-800 p-4">
+                    <h3 class="text-white text-sm font-semibold mb-2 border-b border-gray-700 pb-2">Console Python (agenteTemperaturaIA.py)</h3>
+                    <div id="terminal_log" class="font-mono text-xs text-green-400 h-64 overflow-y-auto space-y-1">
+                        O PyScript está carregando o ambiente Python no seu navegador. Aguarde alguns segundos...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let grafico;
+        function inicializarGrafico() {
+            const ctx = document.getElementById('temperaturaChart').getContext('2d');
+            grafico = new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [
+                    { 
+                        label: 'Temperatura Ambiental (°C)', 
+                        data: [], 
+                        borderColor: 'rgb(79, 70, 229)', 
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)', 
+                        tension: 0.3, 
+                        fill: true 
+                    },
+                    { 
+                        label: 'Temp. Desejada', 
+                        data: [], 
+                        borderColor: 'rgb(34, 197, 94)', 
+                        borderDash: [5, 5], 
+                        borderWidth: 2, 
+                        pointRadius: 0 
+                    },
+                    { 
+                        label: 'Limite Superior (L)', 
+                        data: [], 
+                        borderColor: 'rgb(239, 68, 68)', 
+                        borderDash: [2, 2], 
+                        borderWidth: 2, 
+                        pointRadius: 0 
+                    }
+                ]},
+                options: { responsive: true, scales: { y: { suggestedMin: 22, suggestedMax: 32 } } }
+            });
+            document.getElementById('terminal_log').innerHTML = "> Ambiente carregado e Dataclasses importados! Pronto para iniciar.";
+        }
+        window.onload = inicializarGrafico;
+
+        window.atualizarInterface = function(jsonResultados) {
+            const dados = JSON.parse(jsonResultados);
+            
+            document.getElementById('terminal_log').innerHTML = dados.logs;
+            document.getElementById('metrica_resfriamento').innerText = dados.metricas.media_resfriamento;
+            document.getElementById('metrica_elevacao').innerText = dados.metricas.media_elevacao;
+            document.getElementById('metrica_custo').innerText = dados.metricas.custo;
+            document.getElementById('metrica_sigma').innerText = dados.metricas.sigma;
+            document.getElementById('metrica_limite').innerText = dados.metricas.limite;
+
+            grafico.data.labels = dados.grafico.labels;
+            grafico.data.datasets[0].data = dados.grafico.dados_temperatura;
+            grafico.data.datasets[1].data = dados.grafico.dados_desejada;
+            grafico.data.datasets[2].data = dados.grafico.dados_limite;
+            grafico.update();
+            
+            // Forçar o scroll do terminal para o topo toda vez que rodar
+            document.getElementById('terminal_log').scrollTop = 0;
+        };
+    </script>
+
+    <script type="py">
+import json
+from dataclasses import dataclass, field
+from math import ceil
+from typing import List, Optional, Dict, Any
+from pyscript import document, window
+
+@dataclass
+class Ambiente:
+    temperatura_atual: float
+    temperatura_desejada: float
+    sistema_ligado: bool = False
+
+@dataclass
+class EpisodioTermico:
+    tipo: str
+    temperatura_inicio: float
+    tempo_inicio: int
+    temperatura_fim: Optional[float] = None
+    tempo_fim: Optional[int] = None
+
+    def encerrar(self, temperatura_fim: float, tempo_fim: int) -> None:
+        self.temperatura_fim = temperatura_fim
+        self.tempo_fim = tempo_fim
+
+    @property
+    def duracao(self) -> int:
+        if self.tempo_fim is None:
+            return 0
+        return self.tempo_fim - self.tempo_inicio
+
+class AgenteTemperatura:
+    def __init__(self, temperatura_desejada: float, sigma: float, alpha: float, beta: float, k: float = 1.0) -> None:
+        self.temperatura_desejada = temperatura_desejada
+        self.sigma = sigma
+        self.alpha = alpha
+        self.beta = beta
+        self.k = k
+        self.estado_atual = "DESLIGADO"
+        self.tempo_espera_restante = 0
+        self.tempo_atual = 0
+        self.ultima_acao = "MANTER"
+        self.temperaturas_anteriores: List[float] = []
+        self.historico: List[Dict[str, Any]] = []
+        self.episodio_atual: Optional[EpisodioTermico] = None
+        self.taxas_resfriamento: List[float] = []
+        self.taxas_elevacao: List[float] = []
+
+    @property
+    def limite_superior(self) -> float:
+        return self.temperatura_desejada + 3 * self.sigma
+
+    @property
+    def media_resfriamento(self) -> Optional[float]:
+        if not self.taxas_resfriamento:
+            return None
+        return sum(self.taxas_resfriamento) / len(self.taxas_resfriamento)
+
+    @property
+    def media_elevacao(self) -> Optional[float]:
+        if not self.taxas_elevacao:
+            return None
+        return sum(self.taxas_elevacao) / len(self.taxas_elevacao)
+
+    def verificar_espera(self) -> bool:
+        if self.tempo_espera_restante > 0:
+            self.tempo_espera_restante -= 1
+            self.tempo_atual += 1
+            self._registrar_historico(
+                temperatura=None,
+                custo=None,
+                acao="MANTER",
+                observacao="Agente em espera; nenhuma nova leitura."
+            )
+            return True
+        return False
+
+    def perceber(self, ambiente: Ambiente) -> Dict[str, Any]:
+        return {
+            "Ta": ambiente.temperatura_atual,
+            "Td": ambiente.temperatura_desejada,
+            "estado_sistema": "LIGADO" if ambiente.sistema_ligado else "DESLIGADO",
+        }
+
+    def armazenar_leitura(self, temperatura: float) -> None:
+        self.temperaturas_anteriores.append(temperatura)
+
+    def atualizar_aprendizado_termico(self, temperatura_atual: float) -> None:
+        if self.episodio_atual is None:
+            return
+        Td = self.temperatura_desejada
+        episodio = self.episodio_atual
+
+        if episodio.tipo == "resfriamento" and temperatura_atual <= Td:
+            episodio.encerrar(temperatura_fim=temperatura_atual, tempo_fim=self.tempo_atual)
+            taxa = self._calcular_taxa_resfriamento(episodio)
+            if taxa is not None:
+                self.taxas_resfriamento.append(taxa)
+            self.episodio_atual = None
+        elif episodio.tipo == "elevacao" and temperatura_atual >= Td:
+            episodio.encerrar(temperatura_fim=temperatura_atual, tempo_fim=self.tempo_atual)
+            taxa = self._calcular_taxa_elevacao(episodio)
+            if taxa is not None:
+                self.taxas_elevacao.append(taxa)
+            self.episodio_atual = None
+
+    def _calcular_taxa_resfriamento(self, episodio: EpisodioTermico) -> Optional[float]:
+        dt = episodio.duracao
+        if dt <= 0:
+            return None
+        Td = self.temperatura_desejada
+        return (episodio.temperatura_inicio - Td) / dt
+
+    def _calcular_taxa_elevacao(self, episodio: EpisodioTermico) -> Optional[float]:
+        dt = episodio.duracao
+        if dt <= 0:
+            return None
+        Td = self.temperatura_desejada
+        return (Td - episodio.temperatura_inicio) / dt
+
+    def calcular_custo(self, temperatura_atual: float) -> float:
+        c_ligado = 1 if self.estado_atual == "LIGADO" else 0
+        return self.alpha * abs(temperatura_atual - self.temperatura_desejada) + self.beta * c_ligado
+
+    def decidir(self, temperatura_atual: float) -> str:
+        L = self.limite_superior
+        if temperatura_atual > L:
+            if self.estado_atual == "DESLIGADO":
+                return "LIGAR"
+            return "MANTER"
+        if temperatura_atual <= L and self.estado_atual == "LIGADO":
+            return "DESLIGAR"
+        return "MANTER"
+
+    def calcular_tempo_espera_resfriamento(self, temperatura_atual: float) -> int:
+        excesso = temperatura_atual - self.temperatura_desejada
+        if excesso <= 0: return 0
+        media = self.media_resfriamento
+        if media is not None and media > 0:
+            return max(1, ceil(excesso / media))
+        return max(1, ceil(self.k * excesso))
+
+    def calcular_tempo_espera_elevacao(self, temperatura_atual: float) -> int:
+        falta = self.temperatura_desejada - temperatura_atual
+        if falta <= 0: return 0
+        media = self.media_elevacao
+        if media is not None and media > 0:
+            return max(1, ceil(falta / media))
+        return max(1, ceil(self.k * falta))
+
+    def agir(self, ambiente: Ambiente, acao: str, temperatura_atual: float, custo: float) -> None:
+        if acao == "LIGAR":
+            ambiente.sistema_ligado = True
+            self.estado_atual = "LIGADO"
+            self._iniciar_ou_trocar_episodio("resfriamento", temperatura_atual)
+            self.tempo_espera_restante = self.calcular_tempo_espera_resfriamento(temperatura_atual)
+        elif acao == "DESLIGAR":
+            ambiente.sistema_ligado = False
+            self.estado_atual = "DESLIGADO"
+            self._encerrar_se_resfriamento(temperatura_atual)
+            self._iniciar_ou_trocar_episodio("elevacao", temperatura_atual)
+            if temperatura_atual < self.temperatura_desejada:
+                self.tempo_espera_restante = self.calcular_tempo_espera_elevacao(temperatura_atual)
+            else:
+                self.tempo_espera_restante = 0
+        else:
+            if self.estado_atual == "LIGADO":
+                ambiente.sistema_ligado = True
+                self._iniciar_ou_trocar_episodio("resfriamento", temperatura_atual)
+                self.tempo_espera_restante = self.calcular_tempo_espera_resfriamento(temperatura_atual)
+            else:
+                ambiente.sistema_ligado = False
+                if temperatura_atual < self.temperatura_desejada:
+                    self._iniciar_ou_trocar_episodio("elevacao", temperatura_atual)
+                    self.tempo_espera_restante = self.calcular_tempo_espera_elevacao(temperatura_atual)
+                else:
+                    self.tempo_espera_restante = 0
+
+        self.ultima_acao = acao
+        self._registrar_historico(
+            temperatura=temperatura_atual, custo=custo, acao=acao, observacao="Ação executada."
+        )
+
+    def passo(self, ambiente: Ambiente) -> str:
+        if self.verificar_espera():
+            return "MANTER"
+        self.tempo_atual += 1
+        percepcao = self.perceber(ambiente)
+        temperatura_atual = percepcao["Ta"]
+        self.armazenar_leitura(temperatura_atual)
+        self.atualizar_aprendizado_termico(temperatura_atual)
+        custo = self.calcular_custo(temperatura_atual)
+        acao = self.decidir(temperatura_atual)
+        self.agir(ambiente, acao, temperatura_atual, custo)
+        return acao
+
+    def _iniciar_ou_trocar_episodio(self, tipo: str, temperatura_atual: float) -> None:
+        if self.episodio_atual is None:
+            self.episodio_atual = EpisodioTermico(tipo=tipo, temperatura_inicio=temperatura_atual, tempo_inicio=self.tempo_atual)
+            return
+        if self.episodio_atual.tipo != tipo:
+            self.episodio_atual = EpisodioTermico(tipo=tipo, temperatura_inicio=temperatura_atual, tempo_inicio=self.tempo_atual)
+
+    def _encerrar_se_resfriamento(self, temperatura_atual: float) -> None:
+        if self.episodio_atual is not None and self.episodio_atual.tipo == "resfriamento":
+            self.episodio_atual.encerrar(temperatura_fim=temperatura_atual, tempo_fim=self.tempo_atual)
+            taxa = self._calcular_taxa_resfriamento(self.episodio_atual)
+            if taxa is not None:
+                self.taxas_resfriamento.append(taxa)
+            self.episodio_atual = None
+
+    def _registrar_historico(self, temperatura: Optional[float], custo: Optional[float], acao: str, observacao: str) -> None:
+        self.historico.append({
+            "tempo": self.tempo_atual,
+            "temperatura": temperatura,
+            "temperatura_desejada": self.temperatura_desejada,
+            "limite_superior": self.limite_superior,
+            "estado_atual": self.estado_atual,
+            "acao": acao,
+            "tempo_espera_restante": self.tempo_espera_restante,
+            "custo": custo,
+            "media_resfriamento": self.media_resfriamento,
+            "media_elevacao": self.media_elevacao,
+            "episodio_atual": self.episodio_atual.tipo if self.episodio_atual else None,
+            "observacao": observacao,
+        })
+
+    def resumo(self) -> Dict[str, Any]:
+        return {
+            "tempo_atual": self.tempo_atual,
+            "estado_atual": self.estado_atual,
+            "temperatura_desejada": self.temperatura_desejada,
+            "limite_superior": self.limite_superior,
+            "tempo_espera_restante": self.tempo_espera_restante,
+            "ultima_acao": self.ultima_acao,
+            "media_resfriamento": self.media_resfriamento,
+            "media_elevacao": self.media_elevacao,
+            "leituras_registradas": len(self.temperaturas_anteriores),
+            "episodios_resfriamento": len(self.taxas_resfriamento),
+            "episodios_elevacao": len(self.taxas_elevacao),
+        }
+
+def executar_simulacao(e):
+    # Lendo inputs
+    temp_desejada = float(document.getElementById('temp_desejada').value)
+    sigma = float(document.getElementById('sigma').value)
+    k_val = float(document.getElementById('k_val').value)
+    alpha = float(document.getElementById('alpha').value)
+    beta = float(document.getElementById('beta').value)
+    
+    raw_simuladas = document.getElementById('temp_simuladas').value
+    temperaturas_simuladas = [float(x.strip()) for x in raw_simuladas.split(',')]
+
+    # Inicialização IA
+    ambiente = Ambiente(
+        temperatura_atual=temperaturas_simuladas[0],
+        temperatura_desejada=temp_desejada,
+        sistema_ligado=False
+    )
+
+    agente = AgenteTemperatura(
+        temperatura_desejada=temp_desejada,
+        sigma=sigma,
+        alpha=alpha,
+        beta=beta,
+        k=k_val
+    )
+
+    logs_html = ""
+    labels = []
+    dados_temperatura = []
+    dados_desejada = []
+    dados_limite = []
+
+    for instante, temp in enumerate(temperaturas_simuladas, start=1):
+        ambiente.temperatura_atual = temp
+        acao = agente.passo(ambiente)
+
+        # Print simulando o bloco if __name__ == "__main__":
+        logs_html += f"Instante: {instante}<br>"
+        logs_html += f"Temperatura atual: {temp:.2f} °C<br>"
+        logs_html += f"Ação: {acao}<br>"
+        logs_html += f"Estado do sistema: {agente.estado_atual}<br>"
+        logs_html += f"Tempo de espera restante: {agente.tempo_espera_restante}<br>"
+        logs_html += f"Média de resfriamento: {agente.media_resfriamento}<br>"
+        logs_html += f"Média de elevação: {agente.media_elevacao}<br>"
+        logs_html += f"Resumo: {agente.resumo()}<br>"
+        logs_html += "-" * 60 + "<br>"
+        
+        labels.append(f"T{instante}")
+        dados_temperatura.append(temp)
+        dados_desejada.append(temp_desejada)
+        dados_limite.append(agente.limite_superior)
+
+    # Imprimindo o histórico final da mesma forma
+    logs_html += "<br>HISTÓRICO FINAL<br>"
+    for registro in agente.historico:
+        logs_html += f"{registro}<br>"
+
+    # Extraindo resultados gerais
+    resumo = agente.resumo()
+    custo_final = 0.0
+    for reg in reversed(agente.historico):
+        if reg["custo"] is not None:
+            custo_final = reg["custo"]
+            break
+
+    med_resfriamento = f"{resumo['media_resfriamento']:.2f}" if resumo['media_resfriamento'] is not None else "0.00"
+    med_elevacao = f"{resumo['media_elevacao']:.2f}" if resumo['media_elevacao'] is not None else "0.00"
+
+    resultados = {
+        "logs": logs_html,
+        "metricas": {
+            "media_resfriamento": med_resfriamento,
+            "media_elevacao": med_elevacao,
+            "custo": f"{custo_final:.2f}",
+            "sigma": f"{sigma:.2f}",
+            "limite": f"{resumo['limite_superior']:.2f}"
+        },
+        "grafico": {
+            "labels": labels,
+            "dados_temperatura": dados_temperatura,
+            "dados_desejada": dados_desejada,
+            "dados_limite": dados_limite
+        }
+    }
+
+    window.atualizarInterface(json.dumps(resultados))
+    </script>
+</body>
+</html>
