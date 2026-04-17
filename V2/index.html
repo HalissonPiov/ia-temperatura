@@ -1,38 +1,60 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Controle Térmico IA</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
 
     <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #1a1a1a; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 10px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
+
 <body class="bg-slate-50 text-slate-900 font-sans min-h-screen">
 
     <div class="max-w-7xl mx-auto p-4 lg:p-8 space-y-6">
         <header class="flex items-center justify-between border-b border-slate-200 pb-6">
             <div class="flex items-center gap-3">
                 <div class="p-2 bg-indigo-600 rounded-lg text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 1 1 4 0Z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 1 1 4 0Z" />
+                    </svg>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Agente Térmico Inteligente</h1>
-                    <p class="text-sm text-slate-500 font-medium">Arquitetura V2 • Monitoramento Baseado em Regras</p>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Agente de Temperatura</h1>
+                    <p class="text-sm text-slate-500 font-medium">Sistema Inteligente de Monitoramento e Controle
+                        Térmico.</p>
                 </div>
             </div>
-            <div id="status-badge" class="px-3 py-1 rounded-full bg-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
+            <div id="status-badge"
+                class="px-3 py-1 rounded-full bg-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
                 Aguardando
             </div>
         </header>
@@ -41,46 +63,75 @@
             <aside class="space-y-6 lg:col-span-1">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1-1-1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
                         Configuração
                     </h2>
-                    
+
                     <div class="space-y-5">
                         <div class="relative">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-white px-1">Temp. Alvo</label>
-                            <input type="number" id="temp_desejada" value="24" class="w-full p-3 pt-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold">
+                            <label
+                                class="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-white px-1">Temp.
+                                Alvo</label>
+                            <input type="number" id="temp_desejada" value="24"
+                                class="w-full p-3 pt-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold">
                         </div>
-                        
+
                         <div class="grid grid-cols-2 gap-3">
                             <div class="relative">
-                                <label class="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-white px-1">Sigma (σ)</label>
-                                <input type="number" id="sigma" value="1.0" step="0.1" class="w-full p-3 pt-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold">
+                                <label
+                                    class="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-white px-1">Sigma
+                                    (σ)</label>
+                                <input type="number" id="sigma" value="1.0" step="0.1"
+                                    class="w-full p-3 pt-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold">
                             </div>
                             <div class="relative">
-                                <label class="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-white px-1">Peso (k)</label>
-                                <input type="number" id="k_val" value="1.0" step="0.1" class="w-full p-3 pt-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold">
+                                <label
+                                    class="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-white px-1">Peso
+                                    (k)</label>
+                                <input type="number" id="k_val" value="1.0" step="0.1"
+                                    class="w-full p-3 pt-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3 border-t border-slate-100 pt-4">
                             <div class="relative">
-                                <label class="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-white px-1">Alpha (α)</label>
-                                <input type="number" id="alpha" value="2.0" step="0.1" class="w-full p-3 pt-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold">
+                                <label
+                                    class="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-white px-1">Alpha
+                                    (α)</label>
+                                <input type="number" id="alpha" value="2.0" step="0.1"
+                                    class="w-full p-3 pt-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold">
                             </div>
                             <div class="relative">
-                                <label class="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-white px-1">Beta (β)</label>
-                                <input type="number" id="beta" value="1.0" step="0.1" class="w-full p-3 pt-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold">
+                                <label
+                                    class="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-white px-1">Beta
+                                    (β)</label>
+                                <input type="number" id="beta" value="1.0" step="0.1"
+                                    class="w-full p-3 pt-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold">
                             </div>
                         </div>
 
                         <div class="relative">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-white px-1">Simulação (Ta)</label>
-                            <textarea id="temp_simuladas" rows="4" class="w-full p-3 pt-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-xs font-mono custom-scrollbar">30.0, 29.5, 28.8, 27.9, 26.5, 25.0, 24.2, 23.7, 23.5, 23.8, 24.1, 24.7, 25.2, 26.0</textarea>
+                            <label
+                                class="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-white px-1">Simulação
+                                (Ta)</label>
+                            <textarea id="temp_simuladas" rows="4"
+                                class="w-full p-3 pt-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-xs font-mono custom-scrollbar">30.0, 29.5, 28.8, 27.9, 26.5, 25.0, 24.2, 23.7, 23.5, 23.8, 24.1, 24.7, 25.2, 26.0</textarea>
                         </div>
 
-                        <button py-click="executar_simulacao" class="group w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2 overflow-hidden">
-                            <span>Processar IA</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                        <button py-click="executar_simulacao"
+                            class="group w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2 overflow-hidden">
+                            <span>Processar</span>
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="w-5 h-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="m9 18 6-6-6-6" />
+                            </svg>
                         </button>
                     </div>
                 </div>
@@ -89,44 +140,66 @@
             <main class="lg:col-span-3 space-y-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Gráfico de Telemetria</h2>
+                        <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Gráfico de Telemetria
+                        </h2>
                         <div class="flex gap-4">
-                            <div class="flex items-center gap-2 text-[10px] font-bold text-slate-500"><span class="w-3 h-3 rounded-full bg-indigo-500"></span> AMBIENTE</div>
-                            <div class="flex items-center gap-2 text-[10px] font-bold text-slate-500"><span class="w-3 h-3 rounded-full border-2 border-green-500"></span> ALVO</div>
+                            <div class="flex items-center gap-2 text-[10px] font-bold text-slate-500"><span
+                                    class="w-3 h-3 rounded-full bg-indigo-500"></span> AMBIENTE</div>
+                            <div class="flex items-center gap-2 text-[10px] font-bold text-slate-500"><span
+                                    class="w-3 h-3 rounded-full border-2 border-green-500"></span> ALVO</div>
                         </div>
                     </div>
                     <canvas id="temperaturaChart" height="120"></canvas>
                 </div>
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm transition-hover hover:border-indigo-200">
+                    <div
+                        class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm transition-hover hover:border-indigo-200">
                         <div class="flex items-center justify-between mb-2 text-blue-500">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Resfriamento</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M5 9l7 7 7-7"/></svg>
+                            <span
+                                class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Resfriamento</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2v20M5 9l7 7 7-7" />
+                            </svg>
                         </div>
                         <span class="text-2xl font-black text-slate-800" id="metrica_resfriamento">0.00</span>
                     </div>
 
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm transition-hover hover:border-orange-200">
+                    <div
+                        class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm transition-hover hover:border-orange-200">
                         <div class="flex items-center justify-between mb-2 text-orange-500">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Elevação</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V2M5 15l7-7 7 7"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22V2M5 15l7-7 7 7" />
+                            </svg>
                         </div>
                         <span class="text-2xl font-black text-slate-800" id="metrica_elevacao">0.00</span>
                     </div>
 
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm transition-hover hover:border-emerald-200">
+                    <div
+                        class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm transition-hover hover:border-emerald-200">
                         <div class="flex items-center justify-between mb-2 text-emerald-500">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Custo J</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 18V6"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 18V6" />
+                            </svg>
                         </div>
                         <span class="text-2xl font-black text-slate-800" id="metrica_custo">0.00</span>
                     </div>
 
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm transition-hover hover:border-red-200 bg-red-50/30">
+                    <div
+                        class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm transition-hover hover:border-red-200 bg-red-50/30">
                         <div class="flex items-center justify-between mb-2 text-red-500">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Limite Superior</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5M3 18l18-5M3 6l18 5"/></svg>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Limite
+                                Superior</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m3 11 18-5M3 18l18-5M3 6l18 5" />
+                            </svg>
                         </div>
                         <span class="text-2xl font-black text-red-600" id="metrica_limite">0.00</span>
                     </div>
@@ -135,13 +208,20 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div class="bg-slate-50 border-b border-slate-100 p-4 flex items-center justify-between">
                         <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-indigo-500" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M12 8v4l3 3" />
+                                <circle cx="12" cy="12" r="10" />
+                            </svg>
                             Análise por Instante
                         </h2>
                         <span class="text-[10px] text-slate-400 font-bold">Resumo Sequencial</span>
                     </div>
-                    <div id="instantes_container" class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 h-64 overflow-y-auto custom-scrollbar bg-slate-50/50">
-                        <div class="text-slate-400 text-xs italic p-4 col-span-full text-center">Inicie a simulação para visualizar os dados por instante.</div>
+                    <div id="instantes_container"
+                        class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 h-64 overflow-y-auto custom-scrollbar bg-slate-50/50">
+                        <div class="text-slate-400 text-xs italic p-4 col-span-full text-center">Inicie a simulação para
+                            visualizar os dados por instante.</div>
                     </div>
                 </div>
             </main>
@@ -149,11 +229,16 @@
 
         <div class="space-y-4 pt-6 border-t border-slate-200">
             <div class="flex items-center gap-2 mb-2">
-                <button onclick="switchTab('tab-terminal')" id="btn-terminal" class="px-4 py-2 text-xs font-bold uppercase tracking-tighter rounded-lg bg-slate-800 text-white">Console Python</button>
-                <button onclick="switchTab('tab-historico')" id="btn-historico" class="px-4 py-2 text-xs font-bold uppercase tracking-tighter rounded-lg bg-slate-200 text-slate-600">Histórico Estruturado</button>
+                <button onclick="switchTab('tab-terminal')" id="btn-terminal"
+                    class="px-4 py-2 text-xs font-bold uppercase tracking-tighter rounded-lg bg-slate-800 text-white">Console
+                    Python</button>
+                <button onclick="switchTab('tab-historico')" id="btn-historico"
+                    class="px-4 py-2 text-xs font-bold uppercase tracking-tighter rounded-lg bg-slate-200 text-slate-600">Histórico
+                    Estruturado</button>
             </div>
 
-            <div id="tab-terminal" class="tab-content active bg-[#0d1117] rounded-2xl p-6 shadow-2xl border border-slate-800">
+            <div id="tab-terminal"
+                class="tab-content active bg-[#0d1117] rounded-2xl p-6 shadow-2xl border border-slate-800">
                 <div class="flex items-center gap-2 mb-4 border-b border-slate-800 pb-3">
                     <div class="flex gap-1.5">
                         <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
@@ -162,11 +247,14 @@
                     </div>
                     <span class="text-[10px] font-mono text-slate-500 ml-2">agente_temperatura.py > stdout</span>
                 </div>
-                <pre id="terminal_log" class="font-mono text-xs text-blue-300 leading-relaxed overflow-y-auto max-h-80 custom-scrollbar">Aguardando inicialização do ambiente PyScript...</pre>
+                <pre id="terminal_log"
+                    class="font-mono text-xs text-blue-300 leading-relaxed overflow-y-auto max-h-80 custom-scrollbar">Aguardando inicialização do ambiente PyScript...</pre>
             </div>
 
-            <div id="tab-historico" class="tab-content bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden">
-                <div id="historico_final" class="space-y-3 font-mono text-[11px] h-80 overflow-y-auto custom-scrollbar text-slate-600">
+            <div id="tab-historico"
+                class="tab-content bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden">
+                <div id="historico_final"
+                    class="space-y-3 font-mono text-[11px] h-80 overflow-y-auto custom-scrollbar text-slate-600">
                     Clique em processar para gerar o histórico final.
                 </div>
             </div>
@@ -178,7 +266,7 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            
+
             document.getElementById('btn-terminal').className = tabId === 'tab-terminal' ? 'px-4 py-2 text-xs font-bold uppercase tracking-tighter rounded-lg bg-slate-800 text-white' : 'px-4 py-2 text-xs font-bold uppercase tracking-tighter rounded-lg bg-slate-200 text-slate-600';
             document.getElementById('btn-historico').className = tabId === 'tab-historico' ? 'px-4 py-2 text-xs font-bold uppercase tracking-tighter rounded-lg bg-slate-800 text-white' : 'px-4 py-2 text-xs font-bold uppercase tracking-tighter rounded-lg bg-slate-200 text-slate-600';
         }
@@ -187,29 +275,31 @@
             const ctx = document.getElementById('temperaturaChart').getContext('2d');
             grafico = new Chart(ctx, {
                 type: 'line',
-                data: { labels: [], datasets: [
-                    { label: 'Ambiente', data: [], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.05)', tension: 0.4, fill: true, pointRadius: 4, pointHoverRadius: 6 },
-                    { label: 'Alvo', data: [], borderColor: '#10b981', borderDash: [6, 4], borderWidth: 2, pointRadius: 0 },
-                    { label: 'Limite', data: [], borderColor: '#ef4444', borderDash: [2, 2], borderWidth: 1, pointRadius: 0 }
-                ]},
-                options: { 
-                    responsive: true, 
+                data: {
+                    labels: [], datasets: [
+                        { label: 'Ambiente', data: [], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.05)', tension: 0.4, fill: true, pointRadius: 4, pointHoverRadius: 6 },
+                        { label: 'Alvo', data: [], borderColor: '#10b981', borderDash: [6, 4], borderWidth: 2, pointRadius: 0 },
+                        { label: 'Limite', data: [], borderColor: '#ef4444', borderDash: [2, 2], borderWidth: 1, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
                     plugins: { legend: { display: false } },
-                    scales: { 
+                    scales: {
                         y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10, weight: 'bold' } } },
                         x: { grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' } } }
-                    } 
+                    }
                 }
             });
-            document.getElementById('terminal_log').innerHTML = "> Ambiente Python V2 Carregado com Sucesso.";
+            document.getElementById('terminal_log').innerText = "> Ambiente Python V2 Carregado com Sucesso.";
         }
         window.onload = inicializarGrafico;
 
-        window.atualizarInterface = function(jsonResultados) {
+        window.atualizarInterface = function (jsonResultados) {
             const dados = JSON.parse(jsonResultados);
-            
-            // Terminal e Métricas (CORRIGIDO: A linha do metrica_sigma foi removida)
-            document.getElementById('terminal_log').innerHTML = dados.logs;
+
+            // Terminal e Métricas
+            document.getElementById('terminal_log').innerText = dados.logs;
             document.getElementById('metrica_resfriamento').innerText = dados.metricas.media_resfriamento;
             document.getElementById('metrica_elevacao').innerText = dados.metricas.media_elevacao;
             document.getElementById('metrica_custo').innerText = dados.metricas.custo;
@@ -244,7 +334,7 @@
             grafico.data.datasets[1].data = dados.grafico.dados_desejada;
             grafico.data.datasets[2].data = dados.grafico.dados_limite;
             grafico.update();
-            
+
             document.getElementById('status-badge').className = "px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold uppercase tracking-wider";
             document.getElementById('status-badge').innerText = "Simulação Concluída";
         };
@@ -277,77 +367,286 @@ class EpisodioTermico:
 
     @property
     def duracao(self) -> int:
-        if self.tempo_fim is None: return 0
+        if self.tempo_fim is None:
+            return 0
         return self.tempo_fim - self.tempo_inicio
 
 class AgenteTemperatura:
-    def __init__(self, temperatura_desejada: float, sigma: float, alpha: float, beta: float, k: float = 1.0) -> None:
+    def __init__(
+        self,
+        temperatura_desejada: float,
+        sigma: float,
+        alpha: float,
+        beta: float,
+        k: float = 1.0,
+    ) -> None:
         self.temperatura_desejada = temperatura_desejada
         self.sigma = sigma
         self.alpha = alpha
         self.beta = beta
         self.k = k
+
         self.estado_atual = "DESLIGADO"
         self.tempo_espera_restante = 0
         self.tempo_atual = 0
         self.ultima_acao = "MANTER"
-        self.temperaturas_anteriores = []
-        self.historico = []
-        self.episodio_atual = None
-        self.taxas_resfriamento = []
-        self.taxas_elevacao = []
+
+        self.temperaturas_anteriores: List[float] = []
+        self.historico: List[Dict[str, Any]] = []
+
+        self.episodio_atual: Optional[EpisodioTermico] = None
+        self.taxas_resfriamento: List[float] = []
+        self.taxas_elevacao: List[float] = []
 
     @property
-    def limite_superior(self) -> float: return self.temperatura_desejada + 3 * self.sigma
-    @property
-    def media_resfriamento(self): return sum(self.taxas_resfriamento)/len(self.taxas_resfriamento) if self.taxas_resfriamento else None
-    @property
-    def media_elevacao(self): return sum(self.taxas_elevacao)/len(self.taxas_elevacao) if self.taxas_elevacao else None
+    def limite_superior(self) -> float:
+        return self.temperatura_desejada + 3 * self.sigma
 
-    def verificar_espera(self):
+    @property
+    def media_resfriamento(self) -> Optional[float]:
+        if not self.taxas_resfriamento:
+            return None
+        return sum(self.taxas_resfriamento) / len(self.taxas_resfriamento)
+
+    @property
+    def media_elevacao(self) -> Optional[float]:
+        if not self.taxas_elevacao:
+            return None
+        return sum(self.taxas_elevacao) / len(self.taxas_elevacao)
+
+    def verificar_espera(self) -> bool:
         if self.tempo_espera_restante > 0:
             self.tempo_espera_restante -= 1
             self.tempo_atual += 1
-            self._registrar_historico(None, None, "MANTER", "Espera")
+
+            self._registrar_historico(
+                temperatura=None,
+                custo=None,
+                acao="MANTER",
+                observacao="Agente em espera; nenhuma nova leitura realizada.",
+            )
             return True
+
         return False
 
-    def perceber(self, ambiente):
-        return {"Ta": ambiente.temperatura_atual, "Td": ambiente.temperatura_desejada}
+    def perceber(self, ambiente: Ambiente) -> Dict[str, Any]:
+        percepcao = {
+            "Ta": ambiente.temperatura_atual,
+            "Td": ambiente.temperatura_desejada,
+            "estado_sistema": "LIGADO" if ambiente.sistema_ligado else "DESLIGADO",
+        }
+        return percepcao
 
-    def decidir(self, temperatura_atual):
+    def armazenar_leitura(self, temperatura: float) -> None:
+        self.temperaturas_anteriores.append(temperatura)
+
+    def atualizar_aprendizado_termico(self, temperatura_atual: float) -> None:
+        if self.episodio_atual is None:
+            return
+
+        Td = self.temperatura_desejada
+        episodio = self.episodio_atual
+
+        if episodio.tipo == "resfriamento" and temperatura_atual <= Td:
+            episodio.encerrar(temperatura_fim=temperatura_atual, tempo_fim=self.tempo_atual)
+            taxa = self._calcular_taxa_resfriamento(episodio)
+            if taxa is not None:
+                self.taxas_resfriamento.append(taxa)
+            self.episodio_atual = None
+
+        elif episodio.tipo == "elevacao" and temperatura_atual >= Td:
+            episodio.encerrar(temperatura_fim=temperatura_atual, tempo_fim=self.tempo_atual)
+            taxa = self._calcular_taxa_elevacao(episodio)
+            if taxa is not None:
+                self.taxas_elevacao.append(taxa)
+            self.episodio_atual = None
+
+    def _calcular_taxa_resfriamento(self, episodio: EpisodioTermico) -> Optional[float]:
+        dt = episodio.duracao
+        if dt <= 0:
+            return None
+
+        Td = self.temperatura_desejada
+        return (episodio.temperatura_inicio - Td) / dt
+
+    def _calcular_taxa_elevacao(self, episodio: EpisodioTermico) -> Optional[float]:
+        dt = episodio.duracao
+        if dt <= 0:
+            return None
+
+        Td = self.temperatura_desejada
+        return (Td - episodio.temperatura_inicio) / dt
+
+
+    def calcular_custo(self, temperatura_atual: float) -> float:
+        c_ligado = 1 if self.estado_atual == "LIGADO" else 0
+        return self.alpha * abs(temperatura_atual - self.temperatura_desejada) + self.beta * c_ligado
+
+    def decidir(self, temperatura_atual: float) -> str:
         L = self.limite_superior
-        if temperatura_atual > L: return "LIGAR" if self.estado_atual == "DESLIGADO" else "MANTER"
-        if temperatura_atual <= L and self.estado_atual == "LIGADO": return "DESLIGAR"
+
+        if temperatura_atual > L:
+            if self.estado_atual == "DESLIGADO":
+                return "LIGAR"
+            return "MANTER"
+
+        if temperatura_atual <= L and self.estado_atual == "LIGADO":
+            return "DESLIGAR"
+
         return "MANTER"
 
-    def agir(self, ambiente, acao, temperatura_atual, custo):
-        if acao == "LIGAR":
-            self.estado_atual = "LIGADO"
-            ambiente.sistema_ligado = True
-            self.tempo_espera_restante = max(1, ceil(self.k * (temperatura_atual - self.temperatura_desejada)))
-        elif acao == "DESLIGAR":
-            self.estado_atual = "DESLIGADO"
-            ambiente.sistema_ligado = False
-        self.ultima_acao = acao
-        self._registrar_historico(temperatura_atual, custo, acao, "Execução")
+    def calcular_tempo_espera_resfriamento(self, temperatura_atual: float) -> int:
+        excesso = temperatura_atual - self.temperatura_desejada
+        if excesso <= 0:
+            return 0
 
-    def passo(self, ambiente):
-        if self.verificar_espera(): return "MANTER"
+        media = self.media_resfriamento
+        if media is not None and media > 0:
+            return max(1, ceil(excesso / media))
+
+        return max(1, ceil(self.k * excesso))
+
+    def calcular_tempo_espera_elevacao(self, temperatura_atual: float) -> int:
+        falta = self.temperatura_desejada - temperatura_atual
+        if falta <= 0:
+            return 0
+
+        media = self.media_elevacao
+        if media is not None and media > 0:
+            return max(1, ceil(falta / media))
+
+        return max(1, ceil(self.k * falta))
+
+    def agir(self, ambiente: Ambiente, acao: str, temperatura_atual: float, custo: float) -> None:
+        if acao == "LIGAR":
+            ambiente.sistema_ligado = True
+            self.estado_atual = "LIGADO"
+            self._iniciar_ou_trocar_episodio("resfriamento", temperatura_atual)
+
+            self.tempo_espera_restante = self.calcular_tempo_espera_resfriamento(temperatura_atual)
+
+        elif acao == "DESLIGAR":
+            ambiente.sistema_ligado = False
+            self.estado_atual = "DESLIGADO"
+            self._encerrar_se_resfriamento(temperatura_atual)
+            self._iniciar_ou_trocar_episodio("elevacao", temperatura_atual)
+
+            if temperatura_atual < self.temperatura_desejada:
+                self.tempo_espera_restante = self.calcular_tempo_espera_elevacao(temperatura_atual)
+            else:
+                self.tempo_espera_restante = 0
+
+        else: 
+            if self.estado_atual == "LIGADO":
+                ambiente.sistema_ligado = True
+                self._iniciar_ou_trocar_episodio("resfriamento", temperatura_atual)
+                self.tempo_espera_restante = self.calcular_tempo_espera_resfriamento(temperatura_atual)
+
+            else:
+                ambiente.sistema_ligado = False
+
+                if temperatura_atual < self.temperatura_desejada:
+                    self._iniciar_ou_trocar_episodio("elevacao", temperatura_atual)
+                    self.tempo_espera_restante = self.calcular_tempo_espera_elevacao(temperatura_atual)
+                else:
+                    self.tempo_espera_restante = 0
+
+        self.ultima_acao = acao
+
+        self._registrar_historico(
+            temperatura=temperatura_atual,
+            custo=custo,
+            acao=acao,
+            observacao="Ação executada e estado atualizado.",
+        )
+
+    def passo(self, ambiente: Ambiente) -> str:
+        if self.verificar_espera():
+            return "MANTER"
+
         self.tempo_atual += 1
+
         percepcao = self.perceber(ambiente)
-        temp = percepcao["Ta"]
-        self.temperaturas_anteriores.append(temp)
-        custo = self.alpha * abs(temp - self.temperatura_desejada) + (self.beta if self.estado_atual == "LIGADO" else 0)
-        acao = self.decidir(temp)
-        self.agir(ambiente, acao, temp, custo)
+        temperatura_atual = percepcao["Ta"]
+
+        self.armazenar_leitura(temperatura_atual)
+        self.atualizar_aprendizado_termico(temperatura_atual)
+
+        custo = self.calcular_custo(temperatura_atual)
+
+        acao = self.decidir(temperatura_atual)
+
+        self.agir(ambiente, acao, temperatura_atual, custo)
+
         return acao
 
-    def _registrar_historico(self, temp, custo, acao, obs):
-        self.historico.append({"tempo": self.tempo_atual, "temp": temp, "acao": acao, "custo": custo, "estado": self.estado_atual})
+    def _iniciar_ou_trocar_episodio(self, tipo: str, temperatura_atual: float) -> None:
+        if self.episodio_atual is None:
+            self.episodio_atual = EpisodioTermico(
+                tipo=tipo,
+                temperatura_inicio=temperatura_atual,
+                tempo_inicio=self.tempo_atual,
+            )
+            return
+
+        if self.episodio_atual.tipo != tipo:
+            self.episodio_atual = EpisodioTermico(
+                tipo=tipo,
+                temperatura_inicio=temperatura_atual,
+                tempo_inicio=self.tempo_atual,
+            )
+
+    def _encerrar_se_resfriamento(self, temperatura_atual: float) -> None:
+        if self.episodio_atual is not None and self.episodio_atual.tipo == "resfriamento":
+            self.episodio_atual.encerrar(
+                temperatura_fim=temperatura_atual,
+                tempo_fim=self.tempo_atual,
+            )
+            taxa = self._calcular_taxa_resfriamento(self.episodio_atual)
+            if taxa is not None:
+                self.taxas_resfriamento.append(taxa)
+            self.episodio_atual = None
+
+    def _registrar_historico(
+        self,
+        temperatura: Optional[float],
+        custo: Optional[float],
+        acao: str,
+        observacao: str,
+    ) -> None:
+        self.historico.append(
+            {
+                "tempo": self.tempo_atual,
+                "temperatura": temperatura,
+                "temperatura_desejada": self.temperatura_desejada,
+                "limite_superior": self.limite_superior,
+                "estado_atual": self.estado_atual,
+                "acao": acao,
+                "tempo_espera_restante": self.tempo_espera_restante,
+                "custo": custo,
+                "media_resfriamento": self.media_resfriamento,
+                "media_elevacao": self.media_elevacao,
+                "episodio_atual": self.episodio_atual.tipo if self.episodio_atual else None,
+                "observacao": observacao,
+            }
+        )
+
+    def resumo(self) -> Dict[str, Any]:
+        return {
+            "tempo_atual": self.tempo_atual,
+            "estado_atual": self.estado_atual,
+            "temperatura_desejada": self.temperatura_desejada,
+            "limite_superior": self.limite_superior,
+            "tempo_espera_restante": self.tempo_espera_restante,
+            "ultima_acao": self.ultima_acao,
+            "media_resfriamento": self.media_resfriamento,
+            "media_elevacao": self.media_elevacao,
+            "leituras_registradas": len(self.temperaturas_anteriores),
+            "episodios_resfriamento": len(self.taxas_resfriamento),
+            "episodios_elevacao": len(self.taxas_elevacao),
+        }
 
 def executar_simulacao(e):
-    # Inputs
     temp_desejada = float(document.getElementById('temp_desejada').value)
     sigma = float(document.getElementById('sigma').value)
     k_val = float(document.getElementById('k_val').value)
@@ -355,34 +654,65 @@ def executar_simulacao(e):
     beta = float(document.getElementById('beta').value)
     temperaturas_simuladas = [float(x.strip()) for x in document.getElementById('temp_simuladas').value.split(',')]
 
-    agente = AgenteTemperatura(temp_desejada, sigma, alpha, beta, k_val)
-    ambiente = Ambiente(temperaturas_simuladas[0], temp_desejada)
+    agente = AgenteTemperatura(
+        temperatura_desejada=temp_desejada, 
+        sigma=sigma, 
+        alpha=alpha, 
+        beta=beta, 
+        k=k_val
+    )
+    
+    ambiente = Ambiente(
+        temperatura_atual=temperaturas_simuladas[0], 
+        temperatura_desejada=temp_desejada,
+        sistema_ligado=False
+    )
 
     logs_out = ""
     lista_instantes = []
     
-    for idx, temp in enumerate(temperaturas_simuladas, 1):
+    for instante, temp in enumerate(temperaturas_simuladas, start=1):
         ambiente.temperatura_atual = temp
         acao = agente.passo(ambiente)
         
-        # Log para o Terminal (Console)
-        logs_out += f"INSTANTE {idx} | TA: {temp:.2f} | AÇÃO: {acao} | ESTADO: {agente.estado_atual}\n"
+        # Log 100% fiel ao print do __main__ original
+        logs_out += f"Instante: {instante}\n"
+        logs_out += f"Temperatura atual: {temp:.2f} °C\n"
+        logs_out += f"Ação: {acao}\n"
+        logs_out += f"Estado do sistema: {agente.estado_atual}\n"
+        logs_out += f"Tempo de espera restante: {agente.tempo_espera_restante}\n"
+        logs_out += f"Média de resfriamento: {agente.media_resfriamento}\n"
+        logs_out += f"Média de elevação: {agente.media_elevacao}\n"
+        logs_out += f"Resumo: {agente.resumo()}\n"
+        logs_out += "-" * 60 + "\n"
         
-        # Dados para a nova Aba de Instantes
-        lista_instantes.append({"instante": idx, "temp": temp, "acao": acao, "estado": agente.estado_atual})
+        lista_instantes.append({"instante": instante, "temp": temp, "acao": acao, "estado": agente.estado_atual})
+
+    # Adicionando o histórico final ao log exato
+    logs_out += "\nHISTÓRICO FINAL\n"
+    for registro in agente.historico:
+        logs_out += f"{registro}\n"
 
     # Pack final
     med_res = f"{agente.media_resfriamento:.2f}" if agente.media_resfriamento else "0.00"
     med_ele = f"{agente.media_elevacao:.2f}" if agente.media_elevacao else "0.00"
+    
+    custo_final = 0.0
+    for reg in reversed(agente.historico):
+        if reg["custo"] is not None:
+            custo_final = reg["custo"]
+            break
 
     res = {
         "logs": logs_out,
         "instantes": lista_instantes,
         "historico_bruto": agente.historico,
         "metricas": {
-            "media_resfriamento": med_res, "media_elevacao": med_ele,
-            "custo": f"{agente.historico[-1]['custo']:.2f}" if agente.historico else "0.00",
-            "sigma": f"{sigma:.1f}", "limite": f"{agente.limite_superior:.2f}"
+            "media_resfriamento": med_res, 
+            "media_elevacao": med_ele,
+            "custo": f"{custo_final:.2f}",
+            "sigma": f"{sigma:.1f}", 
+            "limite": f"{agente.limite_superior:.2f}"
         },
         "grafico": {
             "labels": [f"T{i}" for i in range(1, len(temperaturas_simuladas)+1)],
@@ -394,4 +724,5 @@ def executar_simulacao(e):
     window.atualizarInterface(json.dumps(res))
     </script>
 </body>
+
 </html>
